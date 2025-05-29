@@ -24,7 +24,6 @@ return new class extends Migration
             $table->foreignId('office_space_id')->constrained()->cascadeOnDelete();
             $table->softDeletes();
             $table->timestamps();
-            $table->timestamps();
         });
     }
 
