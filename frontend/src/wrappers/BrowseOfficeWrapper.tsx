@@ -8,12 +8,13 @@ export default function BrowseOfficeWrapper() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const apiKey = import.meta.env.VITE_API_KEY;
+
   useEffect(() => {
     axios
       .get("http://127.0.0.1:8000/api/offices", {
         headers: {
-          "X-API-KEY":
-            "$argon2id$v=19$m=1024,t=2,p=2$Xe/DFxjo5xXQ6cqT5z1S0g$LlQHEsJ+RfPZCDow7uVnFA",
+          "X-API-KEY": apiKey,
         },
       })
       .then((response) => {
@@ -24,7 +25,7 @@ export default function BrowseOfficeWrapper() {
         setError(error.message);
         setLoading(false);
       });
-  }, []);
+  }, [apiKey]);
 
   if (loading) {
     return <p>Loading...</p>;

@@ -9,23 +9,25 @@ export default function BrowseCityWrapper() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const apiKey = import.meta.env.VITE_API_KEY;
+  console.log("API Key from env:", apiKey);
+
   useEffect(() => {
     axios
       .get("http://127.0.0.1:8000/api/cities", {
         headers: {
-          "X-API-KEY":
-            "$argon2id$v=19$m=1024,t=2,p=2$Xe/DFxjo5xXQ6cqT5z1S0g$LlQHEsJ+RfPZCDow7uVnFA",
+          "X-API-KEY": apiKey,
         },
       })
       .then((response) => {
         setCities(response.data.data);
         setLoading(false);
       })
-      .catch((error) => {
-        setError(error);
+      .catch((err) => {
+        setError(err.message || "Unknown error");
         setLoading(false);
       });
-  }, []);
+  }, [apiKey]);
 
   if (loading) {
     return <p>Loading...</p>;
@@ -42,10 +44,7 @@ export default function BrowseCityWrapper() {
           You Can Choose <br />
           Our Favorite Cities
         </h2>
-        <a
-          href="#"
-          className="rounded-full rounded-full py-3 px-5 bg-white font-bold"
-        >
+        <a href="#" className="rounded-full py-3 px-5 bg-white font-bold">
           Explore All City
         </a>
       </div>
@@ -63,7 +62,7 @@ export default function BrowseCityWrapper() {
                 key={city.id}
                 className="!w-fit first-of-type:pl-[calc((100%-1130px-60px)/2)] last-of-type:pr-[calc((100%-1130px-60px)/2)]"
               >
-                <CityCard city={city}></CityCard>
+                <CityCard city={city} />
               </SwiperSlide>
             ))}
           </Swiper>
