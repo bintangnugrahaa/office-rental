@@ -1,3 +1,16 @@
+export interface Office {
+  id: number;
+  price: number;
+  duration: number;
+  name: string;
+  slug: string;
+  city: City;
+  thumbnail: string;
+  photos: Photo[];
+  benefits: Benefit[];
+  about: string;
+}
+
 export interface Photo {
   id: number;
   photo: string;
@@ -6,12 +19,6 @@ export interface Photo {
 export interface Benefit {
   id: number;
   name: string;
-}
-
-export interface Office {
-  photos: Photo[];
-  benefits: Benefit[];
-  about: string;
 }
 
 export interface City {
