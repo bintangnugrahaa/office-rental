@@ -15,7 +15,8 @@
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.6.1",
     "swiper": "^11.2.8",
-    "vite-project": "file:"
+    "vite-project": "file:",
+    "zod": "^3.25.56"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",

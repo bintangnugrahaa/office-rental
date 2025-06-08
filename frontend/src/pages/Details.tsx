@@ -1,6 +1,6 @@
 import { Swiper, SwiperSlide } from "swiper/react";
 import Navbar from "../components/Navbar";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import type { Office } from "../types/type";
@@ -222,33 +222,22 @@ export default function Details() {
                     className="w-[30px] h-[30px]"
                     alt="icon"
                   />
-                  <p className="font-semibold leading-[28px]">
-                    {benefit.name}
-                  </p>
+                  <p className="font-semibold leading-[28px]">{benefit.name}</p>
                 </div>
               ))}
             </div>
             <hr className="border-[#F6F5FD]" />
             <div className="flex flex-col gap-[14px]">
-              <a
-                href="booking.html"
-                className="flex items-center justify-center w-full rounded-full p-[16px_26px] gap-3 bg-[#0D903A] font-bold text-[#F7F7FD]"
-              >
-                <img
-                  src="/assets/images/icons/slider-horizontal-white.svg"
-                  className="w-6 h-6"
-                  alt="icon"
-                />
-                <span>Book This Office</span>
-              </a>
-              <button className="flex items-center justify-center w-full rounded-full border border-[#000929] p-[16px_26px] gap-3 bg-white font-semibold">
-                <img
-                  src="/assets/images/icons/save-add.svg"
-                  className="w-6 h-6"
-                  alt="icon"
-                />
-                <span>Save for Later</span>
-              </button>
+              <Link to={`/office/${office.slug}/book`}>
+                <div className="flex items-center justify-center w-full rounded-full p-[16px_26px] gap-3 bg-[#0D903A] font-bold text-[#F7F7FD]">
+                  <img
+                    src="/assets/images/icons/slider-horizontal-white.svg"
+                    className="w-6 h-6"
+                    alt="icon"
+                  />
+                  <span>Book This Office</span>
+                </div>
+              </Link>
             </div>
           </div>
           <div className="flex flex-col rounded-[20px] border border-[#E0DEF7] p-[30px] gap-[20px] bg-white">
