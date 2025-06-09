@@ -1,6 +1,9 @@
-import axios from "axios";
+"use client";
+
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import axios from "axios";
+
 import type { City } from "../types/type";
 import OfficeCard from "../components/OfficeCard";
 import Navbar from "../components/Navbar";
@@ -46,7 +49,7 @@ export default function CityDetails() {
 
   return (
     <>
-      <Navbar></Navbar>
+      <Navbar />
       <header className="flex flex-col w-full">
         <section id="Hero-Banner" className="relative flex h-[434px]">
           <div
@@ -74,6 +77,7 @@ export default function CityDetails() {
           </div>
         </section>
       </header>
+
       <section
         id="Fresh-Space"
         className="flex flex-col gap-[30px] w-full max-w-[1130px] mx-auto mt-[70px] mb-[120px]"

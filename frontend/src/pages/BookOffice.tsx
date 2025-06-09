@@ -1,10 +1,15 @@
+"use client";
+
+import type React from "react";
+
 import { useEffect, useState } from "react";
-import Navbar from "../components/Navbar";
 import { useNavigate, useParams } from "react-router-dom";
-import type { Office } from "../types/type";
 import axios from "axios";
-import { bookingSchema } from "../types/validationBooking";
 import type { z } from "zod";
+
+import Navbar from "../components/Navbar";
+import type { Office } from "../types/type";
+import { bookingSchema } from "../types/validationBooking";
 
 export default function BookOffice() {
   const { slug } = useParams<{ slug: string }>();
@@ -34,7 +39,7 @@ export default function BookOffice() {
       .get(`http://127.0.0.1:8000/api/office/${slug}`, {
         headers: {
           "X-API-KEY":
-            "cd117a21dfd58ae0fda7b737ee6c6e0113ac5058db2d765418e8d6c67e8d4f24",
+            "30d902763958f87734600578c0b20f95c6a6f14e52dff2ecb6487d4a0655ce10bb33d91aeff87145cfde60ec5360427e90f3c2c8c5363306f59569711877627e",
         },
       })
       .then((response) => {
@@ -127,7 +132,7 @@ export default function BookOffice() {
         {
           headers: {
             "X-API-KEY":
-              "cd117a21dfd58ae0fda7b737ee6c6e0113ac5058db2d765418e8d6c67e8d4f24",
+              "30d902763958f87734600578c0b20f95c6a6f14e52dff2ecb6487d4a0655ce10bb33d91aeff87145cfde60ec5360427e90f3c2c8c5363306f59569711877627e",
             "Content-Type": "application/json",
           },
         }

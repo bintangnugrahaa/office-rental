@@ -1,3 +1,5 @@
+"use client";
+
 import BrowseCityWrapper from "../wrappers/BrowseCityWrapper";
 import BrowseOfficeWrapper from "../wrappers/BrowseOfficeWrapper";
 import Navbar from "../components/Navbar";
@@ -5,7 +7,7 @@ import Navbar from "../components/Navbar";
 export default function Browse() {
   return (
     <>
-      <Navbar></Navbar>
+      <Navbar />
       <header className="flex flex-col w-full">
         <section
           id="Hero-Banner"
@@ -22,13 +24,11 @@ export default function Browse() {
                 alt="icon"
               />
               <span className="font-semibold text-white">
-                We’ve won top productivity 500 fortunes
+                We've won top productivity 500 fortunes
               </span>
             </div>
             <h1 className="font-extrabold text-[50px] leading-[60px]">
-              All Great Offices.
-              <br />
-              Grow Your Business.
+              All Great Offices. <br /> Grow Your Business.
             </h1>
             <p className="text-lg leading-8 text-[#000929]">
               Kantor yang tepat dapat memberikan impact pekerjaan menjadi lebih
@@ -74,6 +74,7 @@ export default function Browse() {
             />
           </div>
         </section>
+
         <div className="flex flex-col pt-[150px] pb-10 px-[120px] gap-10 bg-[#0D903A]">
           <div className="logo-contianer flex items-center justify-center flex-wrap max-w-[1130px] h-[38px] mx-auto gap-[60px]">
             <img src="/assets/images/logos/TESLA.svg" alt="clients logo" />
@@ -122,14 +123,15 @@ export default function Browse() {
           </div>
         </div>
       </header>
-      <BrowseCityWrapper></BrowseCityWrapper>
+
+      <BrowseCityWrapper />
+
       <section
         id="Benefits"
         className="flex items-center justify-center w-[1015px] mx-auto gap-[100px] mt-[100px]"
       >
         <h2 className="font-bold text-[32px] leading-[48px] text-nowrap">
-          We Might Good <br />
-          For Your Business
+          We Might Good <br /> For Your Business
         </h2>
         <div className="grid grid-cols-2 gap-[30px]">
           <div className="flex items-center gap-4">
@@ -236,7 +238,8 @@ export default function Browse() {
           </div>
         </div>
       </section>
-      <BrowseOfficeWrapper></BrowseOfficeWrapper>
+
+      <BrowseOfficeWrapper />
     </>
   );
 }

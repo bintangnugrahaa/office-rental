@@ -1,8 +1,11 @@
-import { Swiper, SwiperSlide } from "swiper/react";
-import Navbar from "../components/Navbar";
-import { Link, useParams } from "react-router-dom";
+"use client";
+
 import { useEffect, useState } from "react";
+import { Link, useParams } from "react-router-dom";
+import { Swiper, SwiperSlide } from "swiper/react";
 import axios from "axios";
+
+import Navbar from "../components/Navbar";
 import type { Office } from "../types/type";
 
 export default function Details() {
@@ -46,7 +49,7 @@ export default function Details() {
 
   return (
     <>
-      <Navbar></Navbar>
+      <Navbar />
       <section id="Gallery" className="-mb-[50px]">
         <div className="swiper w-full">
           <div className="swiper-wrapper">
@@ -81,6 +84,7 @@ export default function Details() {
           </div>
         </div>
       </section>
+
       <section
         id="Details"
         className="relative flex max-w-[1130px] mx-auto gap-[30px] mb-20 z-10"
@@ -105,7 +109,9 @@ export default function Details() {
             </div>
           </div>
           <p className="leading-[30px]">{office.about}</p>
+
           <hr className="border-[#F6F5FD]" />
+
           <h2 className="font-bold">You Get What You Need Most</h2>
           <div className="grid grid-cols-3 gap-x-5 gap-y-[30px]">
             <div className="flex items-center gap-4">
@@ -177,7 +183,9 @@ export default function Details() {
               </div>
             </div>
           </div>
+
           <hr className="border-[#F6F5FD]" />
+
           <div className="flex flex-col gap-[6px]">
             <h2 className="font-bold">Office Address</h2>
             <p>{office.name}</p>
@@ -203,6 +211,7 @@ export default function Details() {
             </a>
           </div>
         </div>
+
         <div className="w-[392px] flex flex-col shrink-0 gap-[30px]">
           <div className="flex flex-col rounded-[20px] border border-[#E0DEF7] p-[30px] gap-[30px] bg-white">
             <div>
@@ -213,10 +222,12 @@ export default function Details() {
                 For {office.duration} days working
               </p>
             </div>
+
             <hr className="border-[#F6F5FD]" />
+
             <div className="flex flex-col gap-5">
               {office.benefits.map((benefit) => (
-                <div className="flex items-center gap-3">
+                <div key={benefit.id} className="flex items-center gap-3">
                   <img
                     src="/assets/images/icons/verify.svg"
                     className="w-[30px] h-[30px]"
@@ -226,7 +237,9 @@ export default function Details() {
                 </div>
               ))}
             </div>
+
             <hr className="border-[#F6F5FD]" />
+
             <div className="flex flex-col gap-[14px]">
               <Link to={`/office/${office.slug}/book`}>
                 <div className="flex items-center justify-center w-full rounded-full p-[16px_26px] gap-3 bg-[#0D903A] font-bold text-[#F7F7FD]">
@@ -240,6 +253,7 @@ export default function Details() {
               </Link>
             </div>
           </div>
+
           <div className="flex flex-col rounded-[20px] border border-[#E0DEF7] p-[30px] gap-[20px] bg-white">
             <h2 className="font-bold">Contact Our Sales</h2>
             <div className="flex flex-col gap-[30px]">
