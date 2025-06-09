@@ -11,7 +11,6 @@ export default function BrowseCityWrapper() {
   const [error, setError] = useState<string | null>(null);
 
   const apiKey = import.meta.env.VITE_API_KEY;
-  console.log("API Key from env:", apiKey);
 
   useEffect(() => {
     axios

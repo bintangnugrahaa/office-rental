@@ -1,25 +1,17 @@
-import { useNavigate, useParams } from "react-router-dom";
-import Navbar from "../components/Navbar";
 import { useEffect, useState } from "react";
-import type { z } from "zod";
-import axios from "axios";
+import Navbar from "../components/Navbar";
+import { useNavigate, useParams } from "react-router-dom";
 import type { Office } from "../types/type";
+import axios from "axios";
 import { bookingSchema } from "../types/validationBooking";
+import type { z } from "zod";
 
 export default function BookOffice() {
   const { slug } = useParams<{ slug: string }>();
-  const navigate = useNavigate();
-  const apiKey = import.meta.env.VITE_API_KEY;
-  const baseURL = "http://127.0.0.1:8000/storage";
-
   const [office, setOffice] = useState<Office | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [uniqueCode, setUniqueCode] = useState<number>(0);
-  const [totalAmountWithUniqueCode, setTotalAmountWithUniqueCode] =
-    useState<number>(0);
-  const [formErrors, setFormErrors] = useState<z.ZodIssue[]>([]);
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -29,11 +21,20 @@ export default function BookOffice() {
     totalAmountWithUniqueCode: 0,
   });
 
+  const [formErrors, setFormErrors] = useState<z.ZodIssue[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [uniqueCode, setUniqueCode] = useState<number>(0);
+  const [totalAmountWithUniqueCode, setTotalAmountWithUniqueCode] =
+    useState<number>(0);
+
   useEffect(() => {
+    console.log("Fetching office data...");
+
     axios
       .get(`http://127.0.0.1:8000/api/office/${slug}`, {
         headers: {
-          "X-API-KEY": apiKey,
+          "X-API-KEY":
+            "cd117a21dfd58ae0fda7b737ee6c6e0113ac5058db2d765418e8d6c67e8d4f24",
         },
       })
       .then((response) => {
@@ -63,21 +64,45 @@ export default function BookOffice() {
           console.error("Unexpected error:", error);
           setError("An unexpected error occurred");
         }
+
         setLoading(false);
       });
-  }, [slug, apiKey]);
+  }, [slug]);
+
+  if (loading) {
+    return <p>Loading...</p>;
+  }
+
+  if (error) {
+    return <p>Error loading: {error}</p>;
+  }
+
+  if (!office) {
+    return <p>Data not found</p>;
+  }
+
+  const baseURL = "http://127.0.0.1:8000/storage";
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: value,
     });
+
+    if (formErrors.length > 0) {
+      setFormErrors(formErrors.filter((error) => !error.path.includes(name)));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Form data before validation:", formData);
 
-    console.log("Validating form data...");
+    setFormErrors([]);
+    setError(null);
+
     const validation = bookingSchema.safeParse(formData);
 
     if (!validation.success) {
@@ -92,10 +117,18 @@ export default function BookOffice() {
     try {
       const response = await axios.post(
         "http://127.0.0.1:8000/api/booking-transaction",
-        { ...formData },
+        {
+          name: formData.name,
+          phone_number: formData.phone_number,
+          started_at: formData.started_at,
+          office_space_id: formData.office_space_id,
+          total_amount: formData.totalAmountWithUniqueCode,
+        },
         {
           headers: {
-            "X-API-KEY": apiKey,
+            "X-API-KEY":
+              "cd117a21dfd58ae0fda7b737ee6c6e0113ac5058db2d765418e8d6c67e8d4f24",
+            "Content-Type": "application/json",
           },
         }
       );
@@ -105,13 +138,27 @@ export default function BookOffice() {
       navigate("/success-booking", {
         state: {
           office,
-          booking: response.data,
+          booking: response.data.data,
         },
       });
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
         console.error("Error submitting form:", error.message);
-        setError(error.message);
+        console.error("Error response:", error.response?.data);
+        console.error("Error status:", error.response?.status);
+
+        const errorMessage =
+          error.response?.data?.message ||
+          error.response?.data?.error ||
+          `Request failed with status ${error.response?.status}`;
+        setError(errorMessage);
+
+        if (error.response?.data?.errors) {
+          console.error(
+            "Backend validation errors:",
+            error.response.data.errors
+          );
+        }
       } else {
         console.error("Unexpected error:", error);
         setError("An unexpected error occurred");
@@ -121,22 +168,13 @@ export default function BookOffice() {
     }
   };
 
-  if (loading) {
-    return <p>Loading...</p>;
-  }
-
-  if (error) {
-    return <p>Error loading: {error}</p>;
-  }
-
-  if (!office) {
-    return <p>Data not found</p>;
-  }
+  const getFieldError = (fieldName: string) => {
+    return formErrors.find((error) => error.path.includes(fieldName));
+  };
 
   return (
     <>
       <Navbar />
-
       <div
         id="Banner"
         className="relative w-full h-[240px] flex items-center shrink-0 overflow-hidden -mb-[50px]"
@@ -148,10 +186,9 @@ export default function BookOffice() {
         <img
           src="/assets/images/thumbnails/thumbnail-details-4.png"
           className="absolute w-full h-full object-cover object-top"
-          alt="Banner"
+          alt=""
         />
       </div>
-
       <form
         onSubmit={handleSubmit}
         className="relative flex justify-center max-w-[1130px] mx-auto gap-[30px] mb-20 z-20"
@@ -162,7 +199,7 @@ export default function BookOffice() {
               <img
                 src={`${baseURL}/${office.thumbnail}`}
                 className="w-full h-full object-cover"
-                alt="Office thumbnail"
+                alt="thumbnail"
               />
             </div>
             <div className="flex flex-col gap-2">
@@ -171,17 +208,22 @@ export default function BookOffice() {
                 <img
                   src="/assets/images/icons/location.svg"
                   className="w-6 h-6"
-                  alt="Location icon"
+                  alt="icon"
                 />
                 <p className="font-semibold">{office.city.name}</p>
               </div>
             </div>
           </div>
-
           <hr className="border-[#F6F5FD]" />
-
           <div className="flex flex-col gap-4">
             <h2 className="font-bold">Complete The Details</h2>
+
+            {/* Display general error message */}
+            {error && (
+              <div className="p-3 rounded-lg bg-red-50 border border-red-200">
+                <p className="text-red-600 text-sm">{error}</p>
+              </div>
+            )}
 
             <div className="flex flex-col gap-2">
               <label htmlFor="name" className="font-semibold">
@@ -191,7 +233,7 @@ export default function BookOffice() {
                 <img
                   src="/assets/images/icons/security-user-black.svg"
                   className="w-6 h-6"
-                  alt="User icon"
+                  alt="icon"
                 />
                 <input
                   type="text"
@@ -203,8 +245,8 @@ export default function BookOffice() {
                   placeholder="Write your complete name"
                 />
               </div>
-              {formErrors.find((error) => error.path.includes("name")) && (
-                <p className="text-red-500">Name is required</p>
+              {getFieldError("name") && (
+                <p className="text-red-500 text-sm mt-1">Name is required</p>
               )}
             </div>
 
@@ -216,7 +258,7 @@ export default function BookOffice() {
                 <img
                   src="/assets/images/icons/call-black.svg"
                   className="w-6 h-6"
-                  alt="Phone icon"
+                  alt="icon"
                 />
                 <input
                   type="tel"
@@ -228,9 +270,11 @@ export default function BookOffice() {
                   placeholder="Write your valid number"
                 />
               </div>
-              {formErrors.find((error) =>
-                error.path.includes("phone_number")
-              ) && <p className="text-red-500">Phone Number is required</p>}
+              {getFieldError("phone_number") && (
+                <p className="text-red-500 text-sm mt-1">
+                  Phone Number is required
+                </p>
+              )}
             </div>
 
             <div className="flex flex-col gap-2">
@@ -241,7 +285,7 @@ export default function BookOffice() {
                 <img
                   src="/assets/images/icons/calendar-black.svg"
                   className="w-6 h-6"
-                  alt="Calendar icon"
+                  alt="icon"
                 />
                 <input
                   type="date"
@@ -249,31 +293,30 @@ export default function BookOffice() {
                   onChange={handleChange}
                   value={formData.started_at}
                   id="started_at"
+                  min={new Date().toISOString().split("T")[0]}
                   className="relative appearance-none outline-none w-full py-3 font-semibold [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:opacity-0"
                 />
               </div>
-              {formErrors.find((error) =>
-                error.path.includes("started_at")
-              ) && <p className="text-red-500">Started At is required</p>}
+              {getFieldError("started_at") && (
+                <p className="text-red-500 text-sm mt-1">
+                  Started At is required
+                </p>
+              )}
             </div>
           </div>
-
           <hr className="border-[#F6F5FD]" />
-
           <div className="flex items-center gap-3">
             <img
               src="/assets/images/icons/shield-tick.svg"
               className="w-[30px] h-[30px]"
-              alt="Shield icon"
+              alt="icon"
             />
             <p className="font-semibold leading-[28px]">
               Kami akan melindungi privasi Anda sebaik mungkin sehingga dapat
               fokus bekerja
             </p>
           </div>
-
           <hr className="border-[#F6F5FD]" />
-
           <div className="flex flex-col gap-[30px]">
             <h2 className="font-bold">Bonus Packages For You</h2>
             <div className="grid grid-cols-2 gap-[30px]">
@@ -281,7 +324,7 @@ export default function BookOffice() {
                 <img
                   src="/assets/images/icons/coffee.svg"
                   className="w-[34px] h-[34px]"
-                  alt="Coffee icon"
+                  alt="icon"
                 />
                 <div className="flex flex-col gap-[2px]">
                   <p className="font-bold text-lg leading-[24px]">
@@ -294,7 +337,7 @@ export default function BookOffice() {
                 <img
                   src="/assets/images/icons/group.svg"
                   className="w-[34px] h-[34px]"
-                  alt="Group icon"
+                  alt="icon"
                 />
                 <div className="flex flex-col gap-[2px]">
                   <p className="font-bold text-lg leading-[24px]">Free Move</p>
@@ -307,7 +350,6 @@ export default function BookOffice() {
 
         <div className="flex flex-col shrink-0 w-[400px] h-fit rounded-[20px] border border-[#E0DEF7] p-[30px] gap-[30px] bg-white">
           <h2 className="font-bold">Your Order Details</h2>
-
           <div className="flex flex-col gap-5">
             <div className="flex items-center justify-between">
               <p className="font-semibold">Duration</p>
@@ -333,12 +375,11 @@ export default function BookOffice() {
                 })}
               </p>
             </div>
-
             <div className="relative rounded-xl p-[10px_20px] gap-[10px] bg-[#000929] text-white">
               <img
                 src="/assets/images/icons/Polygon 1.svg"
-                className="absolute -top-[15px] right-[10px]"
-                alt="Polygon"
+                className="absolute -top-[15px] right-[10px] "
+                alt=""
               />
               <p className="font-semibold text-sm leading-[24px] z-10">
                 Tolong perhatikan kode unik berikut ketika melakukan pembayaran
@@ -346,9 +387,7 @@ export default function BookOffice() {
               </p>
             </div>
           </div>
-
           <hr className="border-[#F6F5FD]" />
-
           <h2 className="font-bold">Send Payment to</h2>
           <div className="flex flex-col gap-[30px]">
             <div className="flex items-center gap-3">
@@ -356,7 +395,7 @@ export default function BookOffice() {
                 <img
                   src="/assets/images/logos/bca.svg"
                   className="w-full object-contain"
-                  alt="BCA logo"
+                  alt="bank logo"
                 />
               </div>
               <div className="flex flex-col gap-[2px]">
@@ -365,19 +404,18 @@ export default function BookOffice() {
                   <img
                     src="/assets/images/icons/verify.svg"
                     className="w-[18px] h-[18px]"
-                    alt="Verify icon"
+                    alt="icon"
                   />
                 </div>
                 <p>8008129839</p>
               </div>
             </div>
-
             <div className="flex items-center gap-3">
               <div className="w-[71px] flex shrink-0">
                 <img
                   src="/assets/images/logos/mandiri.svg"
                   className="w-full object-contain"
-                  alt="Mandiri logo"
+                  alt="bank logo"
                 />
               </div>
               <div className="flex flex-col gap-[2px]">
@@ -386,22 +424,20 @@ export default function BookOffice() {
                   <img
                     src="/assets/images/icons/verify.svg"
                     className="w-[18px] h-[18px]"
-                    alt="Verify icon"
+                    alt="icon"
                   />
                 </div>
                 <p>12379834983281</p>
               </div>
             </div>
           </div>
-
           <hr className="border-[#F6F5FD]" />
-
           <button
             type="submit"
             disabled={isLoading}
-            className="flex items-center justify-center w-full rounded-full p-[16px_26px] gap-3 bg-[#0D903A] font-bold text-[#F7F7FD] disabled:opacity-50"
+            className="flex items-center justify-center w-full rounded-full p-[16px_26px] gap-3 bg-[#0D903A] font-bold text-[#F7F7FD] disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
           >
-            <span>{isLoading ? "Loading..." : "I already paid"}</span>
+            <span>{isLoading ? "Processing..." : "I've Already Paid"}</span>
           </button>
         </div>
       </form>
