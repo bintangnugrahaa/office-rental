@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
-import axios from "axios";
 
 import Navbar from "../components/Navbar";
 import type { Office } from "../types/type";
+import apiClient from "../services/apiService";
 
 export default function Details() {
   const { slug } = useParams<{ slug: string }>();
@@ -14,15 +14,9 @@ export default function Details() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const apiKey = import.meta.env.VITE_API_KEY;
-
   useEffect(() => {
-    axios
-      .get(`http://127.0.0.1:8000/api/office/${slug}`, {
-        headers: {
-          "X-API-KEY": apiKey,
-        },
-      })
+    apiClient
+      .get(`/office/${slug}`)
       .then((response) => {
         setOffice(response.data.data);
         setLoading(false);
@@ -31,7 +25,7 @@ export default function Details() {
         setError(error.message);
         setLoading(false);
       });
-  }, [slug, apiKey]);
+  }, [slug]);
 
   if (loading) {
     return <p>Loading...</p>;

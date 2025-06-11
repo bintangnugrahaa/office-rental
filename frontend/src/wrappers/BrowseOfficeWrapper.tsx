@@ -1,23 +1,17 @@
 import { useEffect, useState } from "react";
 import OfficeCard from "../components/OfficeCard";
 import type { Office } from "../types/type";
-import axios from "axios";
 import { Link } from "react-router-dom";
+import apiClient from "../services/apiService";
 
 export default function BrowseOfficeWrapper() {
   const [offices, setOffices] = useState<Office[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const apiKey = import.meta.env.VITE_API_KEY;
-
   useEffect(() => {
-    axios
-      .get("http://127.0.0.1:8000/api/offices", {
-        headers: {
-          "X-API-KEY": apiKey,
-        },
-      })
+    apiClient
+      .get("/offices")
       .then((response) => {
         setOffices(response.data.data);
         setLoading(false);
@@ -26,7 +20,7 @@ export default function BrowseOfficeWrapper() {
         setError(error.message);
         setLoading(false);
       });
-  }, [apiKey]);
+  }, []);
 
   if (loading) {
     return <p>Loading...</p>;

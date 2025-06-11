@@ -1,24 +1,18 @@
 import { Swiper, SwiperSlide } from "swiper/react";
 import CityCard from "../components/CityCard";
 import { useEffect, useState } from "react";
-import axios from "axios";
 import type { City } from "../types/type";
 import { Link } from "react-router-dom";
+import apiClient from "../services/apiService";
 
 export default function BrowseCityWrapper() {
   const [cities, setCities] = useState<City[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const apiKey = import.meta.env.VITE_API_KEY;
-
   useEffect(() => {
-    axios
-      .get("http://127.0.0.1:8000/api/cities", {
-        headers: {
-          "X-API-KEY": apiKey,
-        },
-      })
+    apiClient
+      .get("/cities")
       .then((response) => {
         setCities(response.data.data);
         setLoading(false);
@@ -27,7 +21,7 @@ export default function BrowseCityWrapper() {
         setError(err.message || "Unknown error");
         setLoading(false);
       });
-  }, [apiKey]);
+  }, []);
 
   if (loading) {
     return <p>Loading...</p>;

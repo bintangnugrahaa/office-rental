@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import axios from "axios";
 
 import type { City } from "../types/type";
 import OfficeCard from "../components/OfficeCard";
 import Navbar from "../components/Navbar";
+import apiClient from "../services/apiService";
 
 export default function CityDetails() {
   const { slug } = useParams<{ slug: string }>();
@@ -14,15 +14,9 @@ export default function CityDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const apiKey = import.meta.env.VITE_API_KEY;
-
   useEffect(() => {
-    axios
-      .get(`http://127.0.0.1:8000/api/city/${slug}`, {
-        headers: {
-          "X-API-KEY": apiKey,
-        },
-      })
+    apiClient
+      .get(`/city/${slug}`)
       .then((response) => {
         setCity(response.data.data);
         setLoading(false);
@@ -31,7 +25,7 @@ export default function CityDetails() {
         setError(error.message);
         setLoading(false);
       });
-  }, [slug, apiKey]);
+  }, [slug]);
 
   if (loading) {
     return <p>Loading...</p>;

@@ -39,7 +39,7 @@ export default function BookOffice() {
       .get(`http://127.0.0.1:8000/api/office/${slug}`, {
         headers: {
           "X-API-KEY":
-            "30d902763958f87734600578c0b20f95c6a6f14e52dff2ecb6487d4a0655ce10bb33d91aeff87145cfde60ec5360427e90f3c2c8c5363306f59569711877627e",
+            "30d902763958f87",
         },
       })
       .then((response) => {
@@ -132,7 +132,7 @@ export default function BookOffice() {
         {
           headers: {
             "X-API-KEY":
-              "30d902763958f87734600578c0b20f95c6a6f14e52dff2ecb6487d4a0655ce10bb33d91aeff87145cfde60ec5360427e90f3c2c8c5363306f59569711877627e",
+              "30d902763958f87",
             "Content-Type": "application/json",
           },
         }
