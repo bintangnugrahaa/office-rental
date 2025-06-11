@@ -117,11 +117,19 @@ class BookingTransactionResource extends Resource
                         $messageBody .= "Silakan datang ke lokasi kantor {$record->officeSpace->name} di {$record->officeSpace->address} untuk mulai menggunakan layanan.\n\n";
                         $messageBody .= "Jika Anda memiliki pertanyaan, silakan menghubungi CS kami di wa.me/6285155344998.";
 
+                        // $twilio->messages->create(
+                        //     "+{$record->phone_number}", // tujuan
+                        //     [
+                        //         "body" => $messageBody,
+                        //         "from" => getenv("TWILIO_PHONE_NUMBER"),
+                        //     ]
+                        // );
+
                         $twilio->messages->create(
-                            "+{$record->phone_number}", // tujuan
+                            "whatsapp:+{$record->phone_number}", // to
                             [
+                                "from" => "whatsapp:+14155238886",
                                 "body" => $messageBody,
-                                "from" => getenv("TWILIO_PHONE_NUMBER"),
                             ]
                         );
                     })
