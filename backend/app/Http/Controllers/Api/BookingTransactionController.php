@@ -8,44 +8,34 @@ use App\Http\Resources\Api\BookingTransactionResource;
 use App\Http\Resources\Api\ViewBookingResource;
 use App\Models\BookingTransaction;
 use App\Models\OfficeSpace;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Twilio\Rest\Client;
-use Exception;
 
 class BookingTransactionController extends Controller
 {
-    /**
-     * Mengambil detail booking berdasarkan nomor telepon dan ID transaksi.
-     */
-    public function booking_details(Request $request): ViewBookingResource|JsonResponse
+    public function booking_details(Request $request)
     {
         $request->validate([
-            'phone_number'   => 'required|string',
-            'booking_trx_id' => 'required|string',
+            'phone_number'     => 'required|string',
+            'booking_trx_id'   => 'required|string',
         ]);
 
-        // REFACTOR: Menggunakan firstOrFail untuk penanganan 'not found' yang lebih bersih.
-        // Laravel akan secara otomatis merespon dengan 404 Not Found jika data tidak ada.
         $booking = BookingTransaction::where('phone_number', $request->phone_number)
             ->where('booking_trx_id', $request->booking_trx_id)
             ->with(['officeSpace', 'officeSpace.city'])
-            ->firstOrFail();
+            ->first();
+
+        if (!$booking) {
+            return response()->json(['message' => 'Booking not found'], 404);
+        }
 
         return new ViewBookingResource($booking);
     }
 
-    /**
-     * Menyimpan transaksi booking baru.
-     */
-    public function store(StoreBookingTransactionRequest $request): BookingTransactionResource
+    public function store(StoreBookingTransactionRequest $request)
     {
         $validatedData = $request->validated();
-
-        // REFACTOR: Menggunakan findOrFail untuk memastikan office space ada.
-        // Jika tidak ditemukan, akan otomatis menghasilkan response 404.
-        $officeSpace = OfficeSpace::findOrFail($validatedData['office_space_id']);
+        $officeSpace = OfficeSpace::find($validatedData['office_space_id']);
 
         $validatedData['is_paid'] = false;
         $validatedData['booking_trx_id'] = BookingTransaction::generateUniqueTrxId();
@@ -55,50 +45,25 @@ class BookingTransactionController extends Controller
 
         $bookingTransaction = BookingTransaction::create($validatedData);
 
-        // REFACTOR: Memindahkan logika pengiriman notifikasi ke method terpisah.
-        $this->sendBookingNotification($bookingTransaction);
+        $sid = getenv("TWILIO_ACCOUNT_SID");
+        $token = getenv("TWILIO_AUTH_TOKEN");
+        $twilio = new Client($sid, $token);
 
-        // REFACTOR: Memindahkan return statement ke akhir fungsi agar semua logika dijalankan.
-        return new BookingTransactionResource($bookingTransaction->load('officeSpace'));
-    }
+        $messageBody  = "Hi {$bookingTransaction->name}, Terima kasih telah booking kantor di FirstOffice.\n\n";
+        $messageBody .= "Pesanan kantor {$bookingTransaction->officeSpace->name} Anda sedang kami proses dengan Booking ";
+        $messageBody .= "TRX ID: {$bookingTransaction->booking_trx_id}.\n\n";
+        $messageBody .= "Kami akan menginformasikan kembali status pemesanan Anda secepat mungkin.";
 
-    /**
-     * Mengirim notifikasi SMS setelah booking berhasil dibuat.
-     *
-     * @param BookingTransaction $bookingTransaction
-     */
-    private function sendBookingNotification(BookingTransaction $bookingTransaction): void
-    {
-        // REFACTOR: Menggunakan blok try-catch untuk menangani kegagalan pengiriman SMS.
-        // Kegagalan SMS tidak seharusnya mengagalkan seluruh proses booking (respons 500).
-        try {
-            // REFACTOR: Menggunakan helper config() yang merupakan praktik terbaik di Laravel
-            // daripada getenv() secara langsung.
-            $sid    = config('services.twilio.sid');
-            $token  = config('services.twilio.token');
-            $from   = config('services.twilio.from');
+        $message = $twilio->messages->create(
+            "+{$bookingTransaction->phone_number}",
+            [
+                "body" => $messageBody,
+                "from" => getenv("TWILIO_PHONE_NUMBER"),
+            ]
+        );
 
-            // Pastikan SID, Token, dan nomor pengirim ada sebelum melanjutkan.
-            if (!$sid || !$token || !$from) {
-                Log::error('Twilio credentials are not configured.');
-                return;
-            }
+        $bookingTransaction->load('officeSpace');
 
-            $twilio = new Client($sid, $token);
-
-            // REFACTOR: Pesan notifikasi bisa dibuat lebih dinamis.
-            $messageBody = "Booking Anda untuk office di {$bookingTransaction->officeSpace->name} dengan ID: {$bookingTransaction->booking_trx_id} telah berhasil dibuat.";
-
-            $twilio->messages->create(
-                "+{$bookingTransaction->phone_number}", // To
-                [
-                    "body" => $messageBody,
-                    "from" => $from,
-                ]
-            );
-        } catch (Exception $e) {
-            // REFACTOR: Mencatat error jika pengiriman gagal untuk debugging.
-            Log::error('Twilio SMS sending failed: ' . $e->getMessage());
-        }
+        return new BookingTransactionResource($bookingTransaction);
     }
 }
