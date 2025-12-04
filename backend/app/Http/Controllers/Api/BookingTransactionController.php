@@ -16,8 +16,8 @@ class BookingTransactionController extends Controller
     public function booking_details(Request $request)
     {
         $request->validate([
-            'phone_number'     => 'required|string',
-            'booking_trx_id'   => 'required|string',
+            'phone_number' => 'required|string',
+            'booking_trx_id' => 'required|string',
         ]);
 
         $booking = BookingTransaction::where('phone_number', $request->phone_number)
@@ -49,7 +49,7 @@ class BookingTransactionController extends Controller
         $token = getenv("TWILIO_AUTH_TOKEN");
         $twilio = new Client($sid, $token);
 
-        $messageBody  = "Hi {$bookingTransaction->name}, Terima kasih telah booking kantor di FirstOffice.\n\n";
+        $messageBody = "Hi {$bookingTransaction->name}, Terima kasih telah booking kantor di FirstOffice.\n\n";
         $messageBody .= "Pesanan kantor {$bookingTransaction->officeSpace->name} Anda sedang kami proses dengan Booking ";
         $messageBody .= "TRX ID: {$bookingTransaction->booking_trx_id}.\n\n";
         $messageBody .= "Kami akan menginformasikan kembali status pemesanan Anda secepat mungkin.";
@@ -65,7 +65,7 @@ class BookingTransactionController extends Controller
         $message = $twilio->messages->create(
             "whatsapp:+{$bookingTransaction->phone_number}", // to
             [
-                "from" => "whatsapp:+14155238886",
+                "from" => "whatsapp:+18777804236",
                 "body" => $messageBody,
             ]
         );
